@@ -5,7 +5,13 @@ class Crawler {
 	private $url = '';
 	private $content = '';
 	private $links = [];
-	private $linkUrlIndex = 2;
+	/**
+	 * Links current index of the data that is grabed from the <a></a> tags.
+	 * By default it grabs the href attr.
+	 */
+	private $currentLinkIndex = 2;
+	private $linkHrefIndex = 2;
+	private $linkNodeTextIndex = 3;
 
 	function __construct(string $url) {
 		$this->setUrl($url);
@@ -20,13 +26,13 @@ class Crawler {
 	public function getLinks() {
 		$regexp = "<a\s[^>]*href=(\"??)([^\" >]*?)\\1[^>]*>(.*)<\/a>";
 		preg_match_all("/$regexp/siU", $this->content, $this->links);
-
-		return $this->links[$this->linkUrlIndex];
+		$this->printLinks();
+		return $this->links[$this->currentLinkIndex];
 	}
 
 	public function printLinks() {
-		foreach ($this->links as $link) {
-			print $link . '<br>';
+		foreach ($this->links[$this->currentLinkIndex] as $link) {
+			print "$link<br />";
 		}
 	}
 
@@ -45,8 +51,12 @@ class Crawler {
 	}
 
 	private function removeLinkHashTag(string $link) {
-		if (strpos($link, "#")) {
-			//
+		if (strpos($link, '#')) {
+			$link = substr($link, 0, strpos($link, '#'));
+		}
+		// Remove links starting with the dot
+		if (substr($link, 0, 1) == '.') {
+			$link = substr($link, 1);
 		}
 	}
 }
